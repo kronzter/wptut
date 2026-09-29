@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.env
+.env.local
+client/.env
+client/.env.local
+server/.env
+server/data/cache/*.json
+!server/data/cache/.gitkeep
+.DS_Store
+Thumbs.db
+*.log
+.vite/
+coverage/

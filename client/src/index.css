@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  background: #07090f;
+}
+
+.cesium-viewer,
+.cesium-viewer-cesiumWidgetContainer,
+.cesium-widget,
+.cesium-widget canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.cesium-viewer-toolbar,
+.cesium-viewer-fullscreenContainer {
+  z-index: 20;
+}
+
+.ow-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+.ow-scroll::-webkit-scrollbar-thumb {
+  background: #1c2740;
+  border-radius: 99px;
+}
+
+.ow-panel {
+  @apply rounded-xl bg-ink-900/90 shadow-panel backdrop-blur-md;
+  border: 1px solid rgba(94, 234, 212, 0.14);
+}
+
+.ow-chip {
+  @apply rounded-full border border-phosphor-500/30 bg-ink-800 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-phosphor-400;
+}

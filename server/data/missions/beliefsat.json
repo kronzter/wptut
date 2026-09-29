@@ -1,0 +1,70 @@
+{
+  "id": "beliefsat-0",
+  "name": "Somaiya BeliefSat-0",
+  "codename": "New Leap Labs",
+  "status": "decayed",
+  "liveTrackable": false,
+  "institute": "K. J. Somaiya Institute of Technology (KJSIT), Sion, Mumbai",
+  "team": "New Leap Labs / student satellite team",
+  "launch": {
+    "date": "2024-01-01",
+    "vehicle": "PSLV-C58",
+    "agency": "ISRO",
+    "site": "Satish Dhawan Space Centre, Sriharikota",
+    "platform": "POEM (PSLV Orbital Experimental Module)",
+    "payloadRole": "Amateur-radio payload on POEM"
+  },
+  "orbit": {
+    "class": "LEO",
+    "altitudeKm": 350,
+    "inclinationDeg": 9.6,
+    "note": "Near-equatorial low LEO — short orbital lifetime, high drag sensitivity."
+  },
+  "spacecraft": {
+    "massG": 440,
+    "sizeCm": "15 × 14",
+    "bands": ["UHF→VHF FM repeater", "VHF digipeater", "APRS telemetry ~30 s"]
+  },
+  "purpose": "Global amateur-radio (HAM) communications, commemorating 100 years of amateur radio in India and filling the gap left by ISRO HAMSAT (decommissioned 2014/2016).",
+  "decay": {
+    "date": "2024-03-21",
+    "reason": "The ~350 km POEM orbit decays quickly. BeliefSat-0 is no longer in the live catalog — OrbitWatch keeps the mission story and points you at active stations / amateur satellites as analogs."
+  },
+  "similarPreset": {
+    "group": "stations",
+    "label": "Show similar active objects",
+    "hint": "Stations + amateur-radio sats occupy the same LEO regime BeliefSat-0 flew in."
+  },
+  "timeline": [
+    {
+      "date": "2017",
+      "title": "Touch the Jovian Moon",
+      "body": "KJSIT students win ISRO's competition — the spark for a campus satellite programme."
+    },
+    {
+      "date": "2018",
+      "title": "New Leap begins",
+      "body": "Work starts on an amateur-radio satellite and a campus ground station."
+    },
+    {
+      "date": "2024-01-01",
+      "title": "PSLV-C58 / POEM",
+      "body": "BeliefSat-0 lifts off from Sriharikota as a POEM payload. HAM operators worldwide can activate UHF/VHF services once the experiment module is live."
+    },
+    {
+      "date": "2024-01",
+      "title": "On-orbit copy",
+      "body": "The team reports successful reception of telemetry after launch — 30-second APRS-style beacons designed so students can decode space tech with a modest station."
+    },
+    {
+      "date": "2024-03-21",
+      "title": "Re-entry",
+      "body": "Catalog decay recorded. The mission is complete; OrbitWatch preserves the story beside live LEO traffic."
+    }
+  ],
+  "groundSegment": {
+    "campus": "KJSIT, Sion, Mumbai",
+    "observer": { "lat": 19.0473, "lng": 72.8746, "altM": 14 },
+    "note": "Pass predictions (N2YO) are a phase-2 add-on. v1 estimates 'above campus horizon' from SGP4 look angles."
+  }
+}
