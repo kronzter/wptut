@@ -16,7 +16,7 @@ BeliefSat-0 (K. J. Somaiya Institute of Technology / New Leap Labs, PSLV-C58 POE
 
 - Node.js 18.18+
 - Optional: [Space-Track.org](https://www.space-track.org/) account (debris catalog with object type / RCS)
-- Optional: [Cesium ion](https://ion.cesium.com/tokens) token (not required — the globe uses Esri World Imagery + ellipsoid terrain by default)
+- Optional: [Cesium ion](https://ion.cesium.com/tokens) token — **recommended** for satellite imagery of Earth. Without it, OrbitWatch paints a local globe so the page is never blank.
 - Launch Library 2 needs no key; production is limited to **15 requests/hour** — OrbitWatch caches it
 
 ## Setup
@@ -39,7 +39,17 @@ Edit `server/.env`:
 
 Edit `client/.env`:
 
-- `VITE_CESIUM_ION_TOKEN` — optional
+- `VITE_CESIUM_ION_TOKEN` — paste your ion access token, then **restart** `npm run dev` (Vite only reads this at startup)
+
+Get a free token:
+
+1. Create an account at [https://ion.cesium.com](https://ion.cesium.com)
+2. Open [Access Tokens](https://ion.cesium.com/tokens)
+3. Copy the default token into `client/.env`:
+
+```
+VITE_CESIUM_ION_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
 
 ## Run
 

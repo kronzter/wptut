@@ -1,4 +1,3 @@
-import React from "react";
 import ReactDOM from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
@@ -6,8 +5,9 @@ import { Ion } from "cesium";
 import App from "./App.jsx";
 import "./index.css";
 
-if (import.meta.env.VITE_CESIUM_ION_TOKEN) {
-  Ion.defaultAccessToken = import.meta.env.VITE_CESIUM_ION_TOKEN;
+const ionToken = String(import.meta.env.VITE_CESIUM_ION_TOKEN || "").trim();
+if (ionToken) {
+  Ion.defaultAccessToken = ionToken;
 }
 
 const queryClient = new QueryClient({
@@ -21,11 +21,9 @@ const queryClient = new QueryClient({
 });
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </QueryClientProvider>
-  </React.StrictMode>
+  <QueryClientProvider client={queryClient}>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <App />
+    </BrowserRouter>
+  </QueryClientProvider>
 );

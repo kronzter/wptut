@@ -6,8 +6,17 @@ html,
 body,
 #root {
   height: 100%;
+  min-height: 100vh;
   margin: 0;
   background: #07090f;
+}
+
+body {
+  overflow: hidden;
+}
+
+.cesium-widget-errorPanel {
+  display: none !important;
 }
 
 .cesium-viewer,

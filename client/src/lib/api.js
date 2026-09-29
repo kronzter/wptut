@@ -2,7 +2,19 @@ const API = import.meta.env.VITE_API_BASE || "";
 
 async function getJson(path) {
   const res = await fetch(`${API}${path}`);
-  const body = await res.json().catch(() => ({}));
+  const text = await res.text();
+  const trimmed = text.trimStart();
+  if (trimmed.startsWith("<!") || trimmed.startsWith("<html")) {
+    throw new Error(
+      `API returned a web page instead of JSON for ${path}. Start the server with npm run dev (API on port 3001).`
+    );
+  }
+  let body = {};
+  try {
+    body = text ? JSON.parse(text) : {};
+  } catch {
+    throw new Error(`Could not parse JSON from ${path}`);
+  }
   if (!res.ok) {
     throw new Error(body.error || `${res.status} ${path}`);
   }

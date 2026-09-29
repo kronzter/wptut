@@ -164,76 +164,79 @@ function Dashboard() {
   }
 
   return (
-    <div className="relative h-full overflow-hidden">
-      <div className="absolute inset-0 z-0">
-        <Globe
-          objects={objects}
-          simTime={simTime}
-          selectedId={selectedId}
-          onSelect={pick}
-          flyToken={flyToken}
-        />
-      </div>
-
-      <header className="pointer-events-none absolute left-4 top-4 z-30 max-w-xl">
-        <p className="font-display text-3xl font-extrabold tracking-tight text-white drop-shadow">
-          OrbitWatch
-        </p>
-        <p className="text-sm text-phosphor-300/90">
-          New Leap Labs · BeliefSat-0 context · live LEO traffic
+    <div className="relative flex h-full min-h-0 flex-col overflow-hidden">
+      <header className="flex shrink-0 items-end justify-between px-4 py-3">
+        <div>
+          <p className="font-display text-3xl font-extrabold tracking-tight text-white">
+            OrbitWatch
+          </p>
+          <p className="text-sm text-phosphor-300/90">
+            New Leap Labs · BeliefSat-0 context · live LEO traffic
+          </p>
+        </div>
+        <p className="font-mono text-[10px] text-slate-400">
+          {healthQ.data?.ok ? "API live" : healthQ.isError ? "API down" : "API…"} ·{" "}
+          {objects.length} objects
         </p>
       </header>
 
-      <div className="pointer-events-none absolute right-4 top-4 z-30 font-mono text-[10px] text-slate-400">
-        {healthQ.data?.ok ? "API live" : healthQ.isError ? "API down" : "API…"} ·{" "}
-        {objects.length} objects
-      </div>
-
       {errors.length > 0 && (
-        <div className="absolute left-1/2 top-4 z-40 max-w-md -translate-x-1/2 rounded-md border border-rose-400/40 bg-ink-900/95 px-3 py-2 text-xs text-rose-200">
+        <div className="mx-4 mb-2 rounded-md border border-rose-400/40 bg-ink-900/95 px-3 py-2 text-xs text-rose-200">
           {errors[0]}
         </div>
       )}
 
-      <aside className="ow-scroll absolute bottom-4 left-4 top-24 z-30 flex w-[300px] flex-col gap-3 overflow-auto pointer-events-auto">
-        <LayerPanel layers={layers} onToggle={toggle} onCap={cap} counts={counts} loading={loading} />
-        <SearchBar
-          objects={objects}
-          onPick={pick}
-          onLookup={lookup}
-          lookupError={lookupError}
-          lookupBusy={lookupBusy}
-        />
-        <TimeScrubber
-          live={live}
-          offsetMin={offsetMin}
-          onLive={setLive}
-          onOffset={setOffsetMin}
-          simTime={simTime}
-        />
-        <AltitudeHistogram bins={bins} />
-      </aside>
+      <div className="flex min-h-0 flex-1 gap-3 px-3 pb-3">
+        <aside className="ow-scroll flex w-[280px] shrink-0 flex-col gap-3 overflow-auto">
+          <LayerPanel layers={layers} onToggle={toggle} onCap={cap} counts={counts} loading={loading} />
+          <SearchBar
+            objects={objects}
+            onPick={pick}
+            onLookup={lookup}
+            lookupError={lookupError}
+            lookupBusy={lookupBusy}
+          />
+          <TimeScrubber
+            live={live}
+            offsetMin={offsetMin}
+            onLive={setLive}
+            onOffset={setOffsetMin}
+            simTime={simTime}
+          />
+          <AltitudeHistogram bins={bins} />
+        </aside>
 
-      <aside className="ow-scroll absolute bottom-4 right-4 top-24 z-30 flex w-[320px] flex-col gap-3 overflow-auto pointer-events-auto">
-        <ObjectInspector record={selectedRecord} simTime={simTime} />
-        <SpaceWeatherPanel
-          data={weatherQ.data}
-          error={weatherQ.error}
-          loading={weatherQ.isLoading}
-        />
-        <LaunchesPanel
-          data={launchesQ.data}
-          error={launchesQ.error}
-          loading={launchesQ.isLoading}
-          onOpenBeliefsat={() => setStoryOpen(true)}
-        />
-        <BeliefSatCard
-          mission={missionQ.data}
-          compact
-          onExpand={() => setStoryOpen(true)}
-          onSimilar={showSimilar}
-        />
-      </aside>
+        <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden rounded-xl bg-[#1d4e89] shadow-panel">
+          <Globe
+            objects={objects}
+            simTime={simTime}
+            selectedId={selectedId}
+            onSelect={pick}
+            flyToken={flyToken}
+          />
+        </div>
+
+        <aside className="ow-scroll flex w-[300px] shrink-0 flex-col gap-3 overflow-auto">
+          <ObjectInspector record={selectedRecord} simTime={simTime} />
+          <SpaceWeatherPanel
+            data={weatherQ.data}
+            error={weatherQ.error}
+            loading={weatherQ.isLoading}
+          />
+          <LaunchesPanel
+            data={launchesQ.data}
+            error={launchesQ.error}
+            loading={launchesQ.isLoading}
+            onOpenBeliefsat={() => setStoryOpen(true)}
+          />
+          <BeliefSatCard
+            mission={missionQ.data}
+            compact
+            onExpand={() => setStoryOpen(true)}
+            onSimilar={showSimilar}
+          />
+        </aside>
+      </div>
 
       {storyOpen && missionQ.data && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 p-6">

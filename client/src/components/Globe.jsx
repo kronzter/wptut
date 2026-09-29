@@ -11,8 +11,10 @@ import {
   VerticalOrigin,
   LabelStyle,
   Cartesian2,
-  UrlTemplateImageryProvider,
   EllipsoidTerrainProvider,
+  SingleTileImageryProvider,
+  UrlTemplateImageryProvider,
+  Rectangle,
 } from "cesium";
 import {
   geodeticAt,
@@ -28,18 +30,89 @@ const LAYER_COLORS = {
   debris: Color.fromCssColorString("#f5c16c"),
 };
 
+const TERRAIN_PROVIDER = new EllipsoidTerrainProvider();
+const VIEWER_CONTEXT = {
+  requestWebgl1: true,
+  webgl: {
+    alpha: false,
+    antialias: true,
+    preserveDrawingBuffer: true,
+  },
+};
+
+function earthTextureUrl() {
+  return `${window.location.origin}/earth.png`;
+}
+
+function worldImageryProvider() {
+  return new UrlTemplateImageryProvider({
+    url: "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    credit: "Esri, Maxar, Earthstar Geographics",
+    maximumLevel: 16,
+  });
+}
+
 function GlobeSetup() {
   const { viewer } = useCesium();
   useEffect(() => {
     if (!viewer || viewer.isDestroyed()) return undefined;
-    viewer.scene.globe.baseColor = Color.fromCssColorString("#0d2a44");
-    viewer.scene.globe.enableLighting = true;
-    viewer.scene.globe.showGroundAtmosphere = true;
-    viewer.scene.backgroundColor = Color.fromCssColorString("#02040a");
-    if (viewer.scene.skyAtmosphere) viewer.scene.skyAtmosphere.show = true;
+
+    const scene = viewer.scene;
+    scene.globe.baseColor = Color.fromCssColorString("#1d4e89");
+    scene.globe.enableLighting = false;
+    scene.globe.dynamicAtmosphereLighting = false;
+    scene.globe.showGroundAtmosphere = true;
+    scene.globe.showWaterEffect = false;
+    scene.globe.translucency.enabled = false;
+    scene.backgroundColor = Color.fromCssColorString("#07090f");
+    scene.fog.enabled = false;
+    if (scene.sun) scene.sun.show = true;
+    if (scene.moon) scene.moon.show = false;
+    if (scene.skyBox) scene.skyBox.show = false;
+    if (scene.skyAtmosphere) scene.skyAtmosphere.show = true;
+    viewer.useDefaultRenderLoop = true;
+    scene.globe.show = true;
+    scene.globe.maximumScreenSpaceError = 1.5;
+    scene.globe.tileCacheSize = 200;
+
+    const keepRendering = () => {
+      if (viewer.isDestroyed()) return;
+      viewer.useDefaultRenderLoop = true;
+    };
+    scene.renderError.addEventListener(keepRendering);
+
     viewer.camera.setView({
-      destination: Cartesian3.fromDegrees(72.87, 8, 2.4e7),
+      destination: Cartesian3.fromDegrees(72.87, 19.07, 2.4e7),
     });
+
+    const addEarth = async () => {
+      if (viewer.isDestroyed()) return;
+      viewer.imageryLayers.removeAll();
+
+      try {
+        const local = await SingleTileImageryProvider.fromUrl(earthTextureUrl(), {
+          rectangle: Rectangle.fromDegrees(-180, -90, 180, 90),
+          credit: "OrbitWatch local Earth",
+        });
+        if (viewer.isDestroyed()) return;
+        viewer.imageryLayers.addImageryProvider(local);
+      } catch (err) {
+        console.warn("Local Earth layer failed; using solid globe color.", err);
+      }
+
+      try {
+        const tiles = worldImageryProvider();
+        tiles.errorEvent.addEventListener((error) => {
+          console.warn("World imagery tile error; keeping fallback globe.", error);
+        });
+        if (viewer.isDestroyed()) return;
+        viewer.imageryLayers.addImageryProvider(tiles);
+      } catch (err) {
+        console.warn("World imagery failed; keeping local globe.", err);
+      }
+    };
+    addEarth();
+
     const onResize = () => {
       if (!viewer.isDestroyed()) viewer.resize();
     };
@@ -48,6 +121,7 @@ function GlobeSetup() {
     const ro = new ResizeObserver(onResize);
     if (viewer.container) ro.observe(viewer.container);
     return () => {
+      scene.renderError.removeEventListener(keepRendering);
       window.removeEventListener("resize", onResize);
       ro.disconnect();
     };
@@ -69,6 +143,8 @@ function TrackingLayer({
   const lastUpdate = useRef(0);
   const simRef = useRef(simTime);
   simRef.current = simTime;
+  const onSelectRef = useRef(onSelect);
+  onSelectRef.current = onSelect;
 
   const objectList = useMemo(() => objects, [objects]);
 
@@ -81,7 +157,7 @@ function TrackingLayer({
     handler.setInputAction((click) => {
       const picked = viewer.scene.pick(click.position);
       const payload = picked?.id;
-      if (payload?.noradId) onSelect(payload.noradId);
+      if (payload?.noradId) onSelectRef.current(payload.noradId);
     }, ScreenSpaceEventType.LEFT_CLICK);
 
     return () => {
@@ -92,7 +168,7 @@ function TrackingLayer({
       collectionRef.current = null;
       primitiveMap.current.clear();
     };
-  }, [viewer, onSelect]);
+  }, [viewer]);
 
   useEffect(() => {
     const collection = collectionRef.current;
@@ -206,17 +282,6 @@ function TrackingLayer({
 }
 
 export default function Globe({ objects, simTime, selectedId, onSelect, flyToken }) {
-  const imageryProvider = useMemo(
-    () =>
-      new UrlTemplateImageryProvider({
-        url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-        credit: "Esri, Maxar, Earthstar Geographics",
-        maximumLevel: 19,
-      }),
-    []
-  );
-  const terrainProvider = useMemo(() => new EllipsoidTerrainProvider(), []);
-
   return (
     <Viewer
       full
@@ -228,9 +293,12 @@ export default function Globe({ objects, simTime, selectedId, onSelect, flyToken
       navigationHelpButton={false}
       infoBox={false}
       selectionIndicator={false}
+      fullscreenButton={false}
       skyBox={false}
-      imageryProvider={imageryProvider}
-      terrainProvider={terrainProvider}
+      showRenderLoopErrors={false}
+      baseLayer={false}
+      terrainProvider={TERRAIN_PROVIDER}
+      contextOptions={VIEWER_CONTEXT}
     >
       <GlobeSetup />
       <TrackingLayer
