@@ -8,9 +8,23 @@ BeliefSat-0 (K. J. Somaiya Institute of Technology / New Leap Labs, PSLV-C58 POE
 
 | Layer | Tech |
 | --- | --- |
-| Client | Vite, React 18, Resium/Cesium, satellite.js (SGP4), TanStack Query, Tailwind |
+| Client | Vite, React 18, React Router, Resium/Cesium, satellite.js (SGP4), TanStack Query, Tailwind |
 | Server | Express, node-cron, disk+memory cache |
 | Data | CelesTrak GP, Space-Track (optional), NOAA SWPC, Launch Library 2 |
+| Databases | SQLite (`node:sqlite`) and MongoDB (`mongodb` driver; embedded mongod when no URI) for the watchlist |
+
+## Experiment map
+
+| # | Experiment | Where |
+| --- | --- | --- |
+| 1 | Basic React web page | `client/src/App.jsx`, `client/src/components/` |
+| 2 | React hooks | `useState` / `useEffect` / `useMemo` / `useRef` across `App.jsx`, `Globe.jsx`, `WatchlistForm.jsx`; TanStack `useQuery` / `useMutation` |
+| 3 | Form handling + validation | `client/src/components/WatchlistForm.jsx` (controlled inputs, validate on blur + submit, inline errors, server errors mapped to fields) with rules in `client/src/lib/watchlistRules.js`; server-side in `server/src/services/watchlistValidation.js` |
+| 4 | API integration | `client/src/lib/api.js`; server services calling CelesTrak, NOAA, Launch Library 2, Space-Track |
+| 5 | Node.js | `server/src/` — ES modules, `fs`, cron jobs, disk cache, `node --test` |
+| 6 | Express routing | `server/src/app.js` + `server/src/routes/`; `routes/watchlist.js` uses `router.param`, `router.route()` chaining and GET/POST/PUT/DELETE |
+| 7 | CRUD with SQL and NoSQL | `server/src/db/sqlWatchlist.js` (SQLite, `INSERT/SELECT/UPDATE/DELETE`) and `server/src/db/mongoWatchlist.js` (MongoDB, `insertOne/find/findOneAndUpdate/deleteOne`) behind one interface |
+| 8 | React ↔ Node via REST | `/watchlist` page (`client/src/pages/WatchlistPage.jsx`) calling `/api/watchlist/:store` through the Vite proxy |
 
 ## Prerequisites
 
@@ -68,7 +82,7 @@ Vite proxies `/api` to the Express server.
 npm test
 ```
 
-Covers the NOAA dual-format parser and GP catalog normalizer.
+Covers the NOAA dual-format parser, GP catalog normalizer, watchlist validation, and the watchlist REST CRUD routes (against an in-memory SQLite store).
 
 ## Rate limits (please respect them)
 
@@ -89,6 +103,9 @@ Covers the NOAA dual-format parser and GP catalog normalizer.
 6. Open **BeliefSat-0** — timeline, decay note, **Show similar active objects**.
 7. Space weather drawer: Kp / G-scale and amateur-radio context.
 8. Launches sidebar: upcoming flights, **India / ISRO** chip, PSLV-C58 tie-in.
+9. Select an object → **+ Watch** in the inspector opens `/watchlist` prefilled. Submit an empty or bad form to see validation, add the same NORAD id twice for the duplicate error, then edit and delete. Flip **SQL · SQLite** / **NoSQL · MongoDB** to run the same CRUD against the other database.
+
+> MongoDB: if `MONGODB_URI` is blank, or points at localhost with no MongoDB installed, the server starts an embedded mongod on that port (default `27017`). Connect Compass to `mongodb://127.0.0.1:27017` while the API is running → database `orbitwatch`, collection `watchlist`. `npm install` downloads the mongod binary (~600 MB archive) into `node_modules/.cache`, so the very first start may take a moment.
 
 ## API (selected)
 
@@ -100,3 +117,11 @@ Covers the NOAA dual-format parser and GP catalog normalizer.
 - `GET /api/space-weather/current`
 - `GET /api/launches/upcoming?limit=10`
 - `GET /api/missions/beliefsat`
+
+Watchlist CRUD — `:store` is `sql` (SQLite) or `nosql` (MongoDB):
+
+- `GET /api/watchlist/:store` — list
+- `GET /api/watchlist/:store/:id` — read one
+- `POST /api/watchlist/:store` — create `{ noradId, name, priority?, note? }` → `201`, `422` with `details` on validation errors, `409` on duplicate NORAD id
+- `PUT /api/watchlist/:store/:id` — update any subset of fields
+- `DELETE /api/watchlist/:store/:id` — `204`

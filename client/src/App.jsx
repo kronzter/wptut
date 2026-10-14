@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Route, Routes } from "react-router-dom";
+import { Link, Route, Routes } from "react-router-dom";
 import { api } from "./lib/api.js";
 import { altitudeHistogram } from "./lib/propagate.js";
 import Globe from "./components/Globe.jsx";
@@ -12,6 +12,7 @@ import AltitudeHistogram from "./components/AltitudeHistogram.jsx";
 import SpaceWeatherPanel from "./components/SpaceWeatherPanel.jsx";
 import LaunchesPanel from "./components/LaunchesPanel.jsx";
 import BeliefSatCard from "./components/BeliefSatCard.jsx";
+import WatchlistPage from "./pages/WatchlistPage.jsx";
 
 const INITIAL_LAYERS = {
   stations: { on: true, cap: 80 },
@@ -174,10 +175,15 @@ function Dashboard() {
             New Leap Labs · BeliefSat-0 context · live LEO traffic
           </p>
         </div>
-        <p className="font-mono text-[10px] text-slate-400">
-          {healthQ.data?.ok ? "API live" : healthQ.isError ? "API down" : "API…"} ·{" "}
-          {objects.length} objects
-        </p>
+        <div className="flex items-center gap-3">
+          <Link to="/watchlist" className="ow-chip hover:bg-ink-700">
+            Watchlist
+          </Link>
+          <p className="font-mono text-[10px] text-slate-400">
+            {healthQ.data?.ok ? "API live" : healthQ.isError ? "API down" : "API…"} ·{" "}
+            {objects.length} objects
+          </p>
+        </div>
       </header>
 
       {errors.length > 0 && (
@@ -257,6 +263,7 @@ function Dashboard() {
 export default function App() {
   return (
     <Routes>
+      <Route path="/watchlist" element={<WatchlistPage />} />
       <Route path="/*" element={<Dashboard />} />
     </Routes>
   );

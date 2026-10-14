@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { epochAgeHours, geodeticAt, lookFromCampus, satrecFromRecord } from "../lib/propagate.js";
 
 function fmt(n, d = 2) {
@@ -24,7 +25,15 @@ export default function ObjectInspector({ record, simTime }) {
     <section className="ow-panel p-3">
       <div className="mb-1 flex items-start justify-between gap-2">
         <h2 className="font-display text-sm leading-tight text-phosphor-300">{record.name}</h2>
-        <span className="ow-chip">{record.source}</span>
+        <div className="flex shrink-0 gap-1">
+          <span className="ow-chip">{record.source}</span>
+          <Link
+            to={`/watchlist?${new URLSearchParams({ norad: record.noradId, name: record.name.slice(0, 48) })}`}
+            className="ow-chip hover:bg-ink-700"
+          >
+            + Watch
+          </Link>
+        </div>
       </div>
       <p className="font-mono text-[11px] text-slate-400">NORAD {record.noradId}</p>
       {record.intDes && (

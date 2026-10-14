@@ -12,3 +12,5 @@ Thumbs.db
 *.log
 .vite/
 coverage/
+server/data/watchlist.db*
+server/data/mongo/
